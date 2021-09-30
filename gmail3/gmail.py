@@ -1,3 +1,6 @@
+from email.header import Header
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import re
 import imaplib
 import smtplib
@@ -175,3 +178,32 @@ class Gmail():
 
     def mail_domain(self):
         return self.username.split('@')[-1]
+
+    def send_mail(self, recipient, subject, body, attachment=None):
+        if attachment:
+            raise NotImplementedError  # FIXME - implement attachment
+        if not isinstance(recipient, list):
+            recipient = [recipient, ]
+        if not isinstance(attachment, list):
+            attachment = [attachment, ]
+
+        # Unicode message
+        message = MIMEMultipart('alternative')
+        message['Subject'] = "%s" % Header(subject, 'utf-8')
+        message['From'] = "%s" % (Header(self.username, 'utf-8'))
+
+        recipient_string = ""
+        for name in recipient:
+            recipient_string = recipient_string + name + ","
+        # Cut the last comma
+        recipient_string = recipient_string[0: len(recipient_string) - 1]
+
+        message['To'] = "%s" % (Header(recipient_string, 'utf-8'))
+        message.add_header('reply-to', "%s" % (Header(self.username, 'utf-8')))
+
+        # Attach text and attachment parts
+        text_part = MIMEText(body, 'plain', 'UTF-8')
+        message.attach(text_part)
+        # self.add_files(message, attachment)  # FIXME - implement attachment
+
+        self.smtp.sendmail(self.username, recipient, message.as_string())
