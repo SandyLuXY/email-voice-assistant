@@ -105,4 +105,4 @@ if __name__ == '__main__':
     delete(recentThreads[0])
     MardAsRead(unreadThreads[0])
     MardAsUnread(recentThreads[0])
-    DownloadAttachments(recentThreads[0])
+    DownloadAttachments(recentThreads[0], '.')
